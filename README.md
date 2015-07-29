@@ -2,6 +2,7 @@
 
 #How to run:
 
+<<<<<<< HEAD
 1.Enter Sinalgo main directory
 2.run command line
 3.execute : java -cp binaries/bin sinalgo.runtime.Main -project template
@@ -14,6 +15,10 @@
 
 
 Debugging with eclipse:
+=======
+
+
+>>>>>>> bdf0d93e852fde59780f7fd674c95d48932dbc9c
 1. In the sinalgo folder enter the command line
 2. run sinalgo with the following command:
 	1.java -agentlib:jdwp=transport=dt_socket,address=localhost:8000,suspend=n,server=y -Xmx800m -cp binaries/bin sinalgo.runtime.Main -project template -gen 1 template:ManagerNode Random StaticUDG -gen 4 template:NodeP Random StaticUDG
@@ -26,5 +31,10 @@ Debugging with eclipse:
 	2. "Debug"
 
 
+<<<<<<< HEAD
+=======
+#change the port if need in the java command.
+
+>>>>>>> bdf0d93e852fde59780f7fd674c95d48932dbc9c
 
 
