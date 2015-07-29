@@ -2,15 +2,15 @@
 
 How to run:
 
-1.Enter Sinalgo main directory
-2.run command line
-3.execute : java -cp binaries/bin sinalgo.runtime.Main -project template
-4.click f3 to generate graph
+1. Enter Sinalgo main directory
+2. run command line
+3. execute : java -cp binaries/bin sinalgo.runtime.Main -project template
+4. click f3 to generate graph
 	- create 1 ManagerNode with connectivityModel:myModel
 	- create N NodeP with the same connectivityModel:myModel
-5.for clique click f6 otherwise tou can paint an edge between nodes by deging the mouse from one node to another
-6.right click the manager node and click "start async run"
-7.click on the play simbol in the right menu with big refresh rate to avoid delay 
+5. for clique click f6 otherwise tou can paint an edge between nodes by deging the mouse from one node to another
+6. right click the manager node and click "start async run"
+7. click on the play simbol in the right menu with big refresh rate to avoid delay 
 
 
 Debugging with eclipse:
