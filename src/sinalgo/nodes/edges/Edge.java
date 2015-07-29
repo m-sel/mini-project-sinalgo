@@ -76,10 +76,14 @@ public class Edge implements DoublyLinkedListEntry{
 		return ID;
 	}
 	
-	public int color;
+	private int colorp;
+	
+	public int getColorp() {
+		return colorp;
+	}
 	
 	public void setColor(int color) {
-		this.color = color;
+		this.colorp = color;
 	}
 	
 	public boolean inMatch;
@@ -154,7 +158,7 @@ public class Edge implements DoublyLinkedListEntry{
 	 */
 	public String toString() {
 		// the default implementation returns the name of this edge-class
-		return "Type: " + Global.toShortName(this.getClass().getName());
+		return "Color: " + this.getColorp();
 	}
 	
 

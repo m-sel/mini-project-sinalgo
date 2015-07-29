@@ -1,7 +1,6 @@
 package projects.template.nodes.nodeImplementations;
 
 import java.awt.Color;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,22 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.print.attribute.standard.NumberOfDocuments;
-import javax.swing.text.html.HTMLDocument.Iterator;
-import javax.tools.Tool;
-
-import org.omg.CosNaming.NamingContextPackage.NotEmpty;
-
-import miniProject.nodes.edges.myEdge;
-
-import com.sun.jndi.ldap.ManageReferralControl;
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath.Step;
-
-import projects.defaultProject.nodes.messages.IntMessage;
-import projects.defaultProject.nodes.timers.MessageTimer;
-import projects.sample1.nodes.messages.S1Message;
 import projects.template.ForestData;
-import projects.template.nodes.messages.addNodeToForestMessage;
 import projects.template.nodes.messages.applyColorUpdateMessage;
 import projects.template.nodes.messages.applyColorUpdateMessageComplete;
 import projects.template.nodes.messages.applyColorUpdatefourthMessage;
@@ -37,22 +21,18 @@ import projects.template.nodes.messages.forestEdgeColorMessage;
 import projects.template.nodes.messages.forestEdgeColorMessageComplete;
 import projects.template.nodes.messages.fourthStepMessage;
 import projects.template.nodes.messages.fourthStepMessageComplete;
-import projects.template.nodes.messages.myMessage;
 import projects.template.nodes.messages.secondStepMessage;
 import projects.template.nodes.messages.secondStepMessageComplete;
 import projects.template.nodes.messages.thirdStepMessageComplete;
 import projects.template.nodes.messages.threeVertexMessage;
-import projects.template.nodes.messages.updateColorsMessage;
 import projects.template.nodes.messages.updateParentMessage;
 import sinalgo.configuration.WrongConfigurationException;
+import sinalgo.nodes.Connections;
 import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
-import sinalgo.nodes.messages.NackBox;
 import sinalgo.tools.Tools;
-import sinalgo.tools.storage.ReusableListIterator;
-import sun.net.www.content.audio.wav;
 
 public class NodeP extends sinalgo.nodes.Node {
 	
@@ -159,14 +139,13 @@ public class NodeP extends sinalgo.nodes.Node {
 			Map.Entry<Integer, ForestData> data1 = (Entry<Integer, ForestData>) it.next();
 			ForestData data = data1.getValue();
 			if(data.getColor()==color){
-				//TODO: can be more the one child
-				if(data.getChild()!=0){
-					NodeP child= ((NodeP)Tools.getNodeByID(data.getChild()));
+				for (Integer dataC : data.children) {
+					NodeP child= ((NodeP)Tools.getNodeByID(dataC));
 					if(!this.inMatch && !child.inMatch)
 					{
 						this.inMatch = true;
 						child.inMatch = true;
-						updateEdgeInMatch(this.ID,child.ID);
+						updateEdgeInMatch(this.ID,child.ID,child.outgoingConnections);
 						return;
 					}
 				}
@@ -182,24 +161,22 @@ public class NodeP extends sinalgo.nodes.Node {
 			Map.Entry<Integer, ForestData> data1 = (Entry<Integer, ForestData>) it.next();
 			ForestData data = data1.getValue();
 			if(data.getColor()==color){
-				//TODO: can be more the one child
-				if(data.getChild()!=0){
-					NodeP child= ((NodeP)Tools.getNodeByID(data.getChild()));
+				for (Integer dataC : data.children) {
+					NodeP child= ((NodeP)Tools.getNodeByID(dataC));
 					int nextColor = findFreeColorForEdgeColoring(child);
 					this.lv.add(nextColor);
 					child.lv.add(nextColor);
-					updateEdgeColor(nextColor,data.getID(),child.ID);
+					updateEdgeColor(nextColor,data.getID(),child.ID,child.outgoingConnections);
 				}
-				
 				
 			}
 		}
 		
 	}
 	
-	private void updateEdgeInMatch(int v, int w) {
+	private void updateEdgeInMatch(int v, int w,Connections outgoingConnections) {
 		for(Edge e : outgoingConnections) {
-			if(e.startNode.ID == v &&  e.endNode.ID == w){
+			if(e.startNode.ID == w &&  e.endNode.ID == v){
 				e.setInMatch(true);
 				return;
 			}
@@ -219,13 +196,14 @@ public class NodeP extends sinalgo.nodes.Node {
 	}
 
 
-	private void updateEdgeColor(int nextColor, int v, int w) {
+	private void updateEdgeColor(int nextColor, int v, int w, Connections outgoingConnections) {
 		int i = 1;
 		for(Edge e : outgoingConnections) {
 			if(e.startNode.ID == 1 || e.endNode.ID == 1)
 				e.defaultColor = Color.white;
-			if(e.startNode.ID == v &&  e.endNode.ID == w){
+			if(e.startNode.ID == w &&  e.endNode.ID == v){
 					e.setColor(nextColor);
+					
 					switch (nextColor) {
 					case 0:
 						e.defaultColor = Color.cyan;
@@ -259,8 +237,10 @@ public class NodeP extends sinalgo.nodes.Node {
 			if(data.getColor()==color){
 				if(data.getParent()!=0)
 					forbiddenSet.add(((NodeP) Tools.getNodeByID(data.getParent())).colorByForestId(data1.getKey()));
-				if(data.getChild()!=0)
-					forbiddenSet.add(((NodeP) Tools.getNodeByID(data.getChild())).colorByForestId(data1.getKey()));
+				//if(data.getChild()!=0){
+				for (Integer dataC : data.children) {
+					forbiddenSet.add(((NodeP) Tools.getNodeByID(dataC)).colorByForestId(data1.getKey()));
+				}
 				data.setColor(findFreeColor(forbiddenSet));
 			}
 			
@@ -373,14 +353,17 @@ public class NodeP extends sinalgo.nodes.Node {
 	}
 
 
-	private void updateParentInForests(int forestNum, int parentID) {
+	private void updateParentInForests(int forestNum, int childId) {
 		ForestData hf;
 		if(forestList.containsKey(forestNum)){
 			hf = forestList.get(forestNum);
 		}else{
-			hf = new ForestData(this.ID,0);
+			hf = new ForestData(this.ID);
 		}
-		hf.setParent(parentID);
+		
+		hf.addChild(childId);
+		
+		//hf.setParent(parentID);
 		forestList.put(forestNum, hf);
 		
 	}
@@ -393,7 +376,7 @@ public class NodeP extends sinalgo.nodes.Node {
 				ForestData hf;
 				if(forestList.containsKey(i)){
 					hf = forestList.get(i);
-					hf.setChild(e.endNode.ID);
+					//hf.setParent(e.endNode.ID);
 				}else{
 					hf = new ForestData(this.ID, e.endNode.ID);
 					hf.setForestNumber(i);
@@ -417,7 +400,7 @@ public class NodeP extends sinalgo.nodes.Node {
 		for(Node n: removeNodesTo){
 			outgoingConnections.remove(this, n);
 		}
-		broadcast(new firstStepMessageComplete(1));
+		send(new firstStepMessageComplete(1),ManagerNode);
 	}
 			
 
@@ -462,9 +445,7 @@ public class NodeP extends sinalgo.nodes.Node {
 	
 	@NodePopupMethod(menuText="Multicast 2")
 	public void myPopupMethod() {
-//		IntMessage msg = new IntMessage(2);
-//		MessageTimer timer = new MessageTimer(msg);
-//		timer.startRelative(1, this);
+		projects.template.nodes.nodeImplementations.ManagerNode.getWriter().close();
 	}
 	
 }

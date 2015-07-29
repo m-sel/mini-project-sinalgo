@@ -18,16 +18,27 @@ public class ForestData {
 	private int counter;
 	private int forestNumber;
 	public HashSet<Integer> Lv;
+	public HashSet<Integer> children;
 	
-	public ForestData(int id,int child) {
-		this.parent=0;
+	public ForestData(int id,int parent) {
+		this.parent=parent;
 		this.ID = id;
-		this.child = child;
+		this.child = 0;
 		this.color=id;
 		this.Lv = new HashSet<Integer>();
+		this.children = new HashSet<Integer>();
 	}
 	
 	
+	public ForestData(int id) {
+		this.ID = id;
+		this.child = 0;
+		this.color=id;
+		this.Lv = new HashSet<Integer>();
+		this.children = new HashSet<Integer>();
+	}
+
+
 	public int getID() {
 		return ID;
 	}
@@ -35,6 +46,8 @@ public class ForestData {
 	public int getChild() {
 		return child;
 	}
+	
+	
 	
 	public int getParent() {
 		return parent;
@@ -50,11 +63,10 @@ public class ForestData {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "parent: " + this.parent + " parent color: " + 
 				((parent!=0) ? ((NodeP)Tools.getNodeByID(this.parent)).colorByForestId(forestNumber) : -1)
 				+ " me: " + this.ID +  " my color : " + this.color 
-				+ " child: " + this.child;
+				+ " child: " + this.children.toString();
 				
 	}
 	
@@ -89,6 +101,11 @@ public class ForestData {
 	
 	public void setForestNumber(int forestNumber) {
 		this.forestNumber = forestNumber;
+	}
+
+
+	public void addChild(int child) {
+		this.children.add(child);
 	}
 	
 	

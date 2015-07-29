@@ -202,6 +202,7 @@ public abstract class Node implements DoublyLinkedListEntry{
 		return "Node(ID="+this.ID+")"; 
 	}
 	
+	
 	/**
 	 * This method checks if the configuration meets the specification of the node. This 
 	 * function is called exactly once just after the initialisazion of a node but before 

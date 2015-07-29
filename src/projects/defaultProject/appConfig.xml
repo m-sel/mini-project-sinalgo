@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sinalgo>
 	<ProjectSelector windowWidth="800" windowHeight="600" lastChosenProject="sample1" windowPosX="210" windowPosY="52" isMaximized="false" selectedTab="2" />
-	<GUI windowWidth="801" windowHeight="660" windowPosX="98" windowPosY="71" isMaximized="true" ControlPanelExpandSimulation="true" ControlPanelShowFullViewPanel="false" ControlPanelShowTextPanel="true" ControlPanelShowProjectControl="true" RunOperationIsLimited="false" helpWindowWidth="500" helpWindowHeight="500" helpWindowPosX="200" helpWindowPosY="200" helpWindowIsMaximized="false" />
-	<RandomSeed seedFromPreviousRun="2776773973331338919" />
-	<App lastSelectedFileDirectory="" checkForUpdatesAtStartup="false" updateCheckTimeStamp="0" runCmdLineArgs="" />
-	<GenNodesDlg numNodes="1000" />
+	<GUI windowWidth="801" windowHeight="660" windowPosX="576" windowPosY="0" isMaximized="false" ControlPanelExpandSimulation="true" ControlPanelShowFullViewPanel="false" ControlPanelShowTextPanel="true" ControlPanelShowProjectControl="true" RunOperationIsLimited="false" helpWindowWidth="500" helpWindowHeight="500" helpWindowPosX="200" helpWindowPosY="200" helpWindowIsMaximized="false" />
+	<RandomSeed seedFromPreviousRun="-4076189882299666230" />
+	<App lastSelectedFileDirectory="" checkForUpdatesAtStartup="false" updateCheckTimeStamp="0" runCmdLineArgs="-project template -gen 1 template:ManagerNode Random StaticUDG -gen 800 template:NodeP Random template:myModel " />
+	<GenNodesDlg numNodes="4" />
 </sinalgo>
 

@@ -1,23 +1,13 @@
 package projects.template.nodes.nodeImplementations;
 
 import java.awt.Color;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import javax.print.attribute.standard.NumberOfDocuments;
-
-import miniProject.nodes.edges.myEdge;
-
-import com.sun.jndi.ldap.ManageReferralControl;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.Template;
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath.Step;
-import com.sun.org.apache.xml.internal.resolver.helpers.Debug;
-
-import projects.defaultProject.nodes.messages.IntMessage;
 import projects.defaultProject.nodes.timers.MessageTimer;
-import projects.sample1.nodes.messages.S1Message;
-import projects.sample4.nodes.nodeImplementations.S4Node;
-import projects.sample4.nodes.timers.S4SendDirectTimer;
 import projects.template.ForestData;
 import projects.template.nodes.messages.applyColorUpdateMessage;
 import projects.template.nodes.messages.applyColorUpdateMessageComplete;
@@ -31,13 +21,10 @@ import projects.template.nodes.messages.forestEdgeColorMessage;
 import projects.template.nodes.messages.forestEdgeColorMessageComplete;
 import projects.template.nodes.messages.fourthStepMessage;
 import projects.template.nodes.messages.fourthStepMessageComplete;
-import projects.template.nodes.messages.myMessage;
 import projects.template.nodes.messages.secondStepMessage;
 import projects.template.nodes.messages.secondStepMessageComplete;
 import projects.template.nodes.messages.thirdStepMessageComplete;
 import projects.template.nodes.messages.threeVertexMessage;
-import projects.template.nodes.messages.updateColorsMessage;
-import projects.template.nodes.messages.updateParentMessage;
 import sinalgo.configuration.WrongConfigurationException;
 import sinalgo.nodes.Node;
 import sinalgo.nodes.edges.Edge;
@@ -56,6 +43,16 @@ public class ManagerNode extends sinalgo.nodes.Node {
 	private static Node toDeleteNode = null;
 	private static int NumberOfanswers;
 	private static int iteration;
+	
+	//for output results
+	private static int delta;
+	public static PrintWriter writer;
+	private static int edges;
+	private static StringBuilder outputString;
+	
+	public static PrintWriter getWriter() {
+		return writer;
+	}
 	
 	@Override
 	public void handleMessages(Inbox inbox) {
@@ -146,6 +143,11 @@ public class ManagerNode extends sinalgo.nodes.Node {
 			case 8:
 				removeEdgesFromManagerAndPrintResult();
 				printMaximalMatch();
+				try {
+					writeResultsToFile();
+				} catch (FileNotFoundException | UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			default:
 				break;
 			}
@@ -156,36 +158,63 @@ public class ManagerNode extends sinalgo.nodes.Node {
 			
 	
 	
-	private void printMaximalMatch() {
+	private void writeResultsToFile() throws FileNotFoundException, UnsupportedEncodingException {
+		int size;
+		System.out.println(outputString.toString());
+		size = Tools.getNodeList().size()-1;
+		System.out.println("Number Of vertex : " + size);
+		calcDeltaAndNumberOfEdges();
+		System.out.println("Number Of edges : " + edges);
+		System.out.println("Delta : " + delta);
+		System.out.println("Running Time : " + Tools.getGlobalTime());
+		System.out.println("Number Of events (Message sent from manager) : " + Tools.getNumberOfSentMessages());
+		
+	}
+
+
+
+	private void calcDeltaAndNumberOfEdges() {
 		for(Edge e : outgoingConnections) {
-			for (Edge e1 : ((NodeP)e.endNode).outgoingConnections) {
-				if(e1.inMatch){
-					System.out.println("InMatch: V: " + e1.startNode.ID + " V: " + e1.endNode.ID);
-					if(e1.endNode.ID != 1){
-						e1.startNode.setColor(Color.pink);
-						e1.endNode.setColor(Color.pink);
-//						e1.defaultColor= Color.pink;
-				
-					}
-				}
-			}
+			edges += e.endNode.outgoingConnections.size()-1;
+			delta = Math.max(delta,e.endNode.outgoingConnections.size()-1);
 		}
 		
 	}
 
 
 
+	private void printMaximalMatch() {
+		int counter = 0;
+		for(Edge e : outgoingConnections) {
+			for (Edge e1 : ((NodeP)e.endNode).outgoingConnections) {
+				if(e1.inMatch){
+					System.out.println("InMatch: V: " + e1.startNode.ID + " V: " + e1.endNode.ID);
+					if(e1.endNode.ID != 1){
+						counter++;
+						e1.startNode.setColor(Color.pink);
+						e1.endNode.setColor(Color.pink);
+					}
+				}
+			}
+		}
+		
+		outputString.append("Maximal Match : " + counter);
+	}
+
+
+
 	private void removeEdgesFromManagerAndPrintResult() {
-		int i=1;
 		HashSet<Edge> set = new HashSet<Edge>();
+		int maxColor = 0 ;
 		for(Edge e : outgoingConnections) {
 			if(e.startNode.ID == 1){
 				set.add(e);
 			}
 			for (Edge e1 : ((NodeP)e.endNode).outgoingConnections) {
 				if(e1.endNode.ID!=1 && e1.startNode.ID!=1){
+					maxColor = Math.max(maxColor, e1.getColorp());
 					System.out.println("vertex " + e1.startNode.ID + 
-							"---color:" + e1.color
+							"---color:" + e1.getColorp()
 							+ "---->" + " vertex " + e1.endNode.ID);
 				}else{
 					e1.defaultColor=Color.white;
@@ -196,6 +225,9 @@ public class ManagerNode extends sinalgo.nodes.Node {
 			edge.defaultColor = Color.white;
 		}
 		
+		maxColor++;
+		outputString.append("Number of color used : " + maxColor);
+		outputString.append("\n");
 	}
 
 
@@ -208,6 +240,12 @@ public class ManagerNode extends sinalgo.nodes.Node {
 	@Override
 	public void init() {
 		setColor(Color.yellow);
+		outputString = new StringBuilder();
+		try {
+			writer = new PrintWriter("output.txt", "UTF-8");
+		} catch (FileNotFoundException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -219,8 +257,6 @@ public class ManagerNode extends sinalgo.nodes.Node {
 
 	@Override
 	public void postStep() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -231,10 +267,13 @@ public class ManagerNode extends sinalgo.nodes.Node {
 	
 	@NodePopupMethod(menuText="start async run")
 	public void myPopupMethod() {
+
 		firstStepMessage msg = new firstStepMessage(2);
 		MessageTimer timer = new MessageTimer(msg);
 		timer.startRelative(1, this);
 	}
+	
+	
 	
 	private static int calcIters(double n) {
 		int count = 0;
